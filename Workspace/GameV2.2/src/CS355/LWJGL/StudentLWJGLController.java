@@ -12,36 +12,17 @@ package CS355.LWJGL;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_LINES;
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.GL_POLYGON;
-import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glColor3f;
-import static org.lwjgl.opengl.GL11.glColor3d;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glMatrixMode;
-import static org.lwjgl.opengl.GL11.glPushMatrix;/*might not use*/
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glRotatef;
-import static org.lwjgl.opengl.GL11.glRotated;
-import static org.lwjgl.opengl.GL11.glTranslatef;
-import static org.lwjgl.opengl.GL11.glTranslated;
-import static org.lwjgl.opengl.GL11.glVertex3d;
-import static org.lwjgl.opengl.GL11.glViewport;
-import static org.lwjgl.opengl.GL11.glOrtho;
+import org.lwjgl.opengl.GL11;
+
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_LIGHT0;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
 
 /**
@@ -57,14 +38,36 @@ public class StudentLWJGLController implements CS355LWJGLController {
 	private Player player2 = new Player(new Color3D(.7, .4,.3), new Point3D(0,0,-295));
 	private Player player3 = new Player(new Color3D(.6, .4,.2), new Point3D(0,0,295));
 
+	// Create light components
+	float ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	float diffuseLight[] = { 0.1f, 0.8f, 0.1f, 1.0f };
+	float specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	float position[] = { -295f,10f,50f, 1.0f };
+
+	private static FloatBuffer asFloatBuffer(float[] values) {
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(values.length);
+		buffer.put(values);
+		buffer.flip();
+		return buffer;
+	}
+
 	@Override
 	public void resizeGL()  {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		gluPerspective(60, 500/500, 1, 1000);
 		glMatrixMode(GL_MODELVIEW);
-		
-		
+
+		//lighting
+		// Somewhere in the initialization part of your program…
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+		//GL11.glLightModeli(GL11.GL_LIGHT_MODEL_TWO_SIDE, GL11.GL_TRUE);
+
+
+		GL11.glColorMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE);
+		GL11.glEnable(GL11.GL_COLOR_MATERIAL);//allows you to add lighting to already color polygons
+
 	}
 
     @Override
@@ -169,8 +172,17 @@ public class StudentLWJGLController implements CS355LWJGLController {
         glEnable(GL_DEPTH_TEST);
         glRotatef(cameraRot, 0, 1, 0);
         //glRotatef((float)90, 1, 0, 0); //used to look down
-        glTranslatef(-(float)cameraPos.x, -(float) cameraPos.y, -(float) cameraPos.z);
-    	for(int a = 0; a < maze.Walls.size();a++){
+        glTranslatef(-(float) cameraPos.x, -(float) cameraPos.y, -(float) cameraPos.z);
+
+		//*************************lighting stuff****************************/
+		//glLight(GL_LIGHT0, GL_AMBIENT, asFloatBuffer(ambientLight));
+		//glLight(GL_LIGHT0, GL_DIFFUSE, asFloatBuffer(diffuseLight));
+		//glLight(GL_LIGHT0, GL_SPECULAR, asFloatBuffer(specularLight));
+		glLight(GL_LIGHT0, GL_POSITION, asFloatBuffer(position));
+		glColor3d(1, 1, 1);
+		drawSquare(new Point3D(-295, 10, 50));
+
+		for(int a = 0; a < maze.Walls.size();a++){
 	        glBegin(GL_POLYGON);
 	        glColor3d(maze.Walls.get(a).color.r, maze.Walls.get(a).color.g, maze.Walls.get(a).color.b);
 	        for(int b = 0; b < maze.Walls.get(a).corners.size();b++){
@@ -216,6 +228,59 @@ public class StudentLWJGLController implements CS355LWJGLController {
     	glPopMatrix();
     }
 
+	private void drawSquare(Point3D p) {
+		if(p == null)
+			return;
+		double xPos = p.x + 0.5;
+		double yPos = p.y + 0.5;
+		double xNeg = p.x - 0.5;
+		double yNeg = p.y - 0.5;
+		double zPos = p.z + 0.5;
+		double zNeg = p.z - 0.5;
+
+		//front/back
+		glBegin(GL_POLYGON);
+		glVertex3d(xPos, yPos, zNeg);
+		glVertex3d(xPos, yNeg, zNeg);
+		glVertex3d(xNeg, yNeg, zNeg);
+		glVertex3d(xNeg, yPos, zNeg);
+		glEnd();
+		glBegin(GL_POLYGON);
+		glVertex3d(xPos, yPos, zPos);
+		glVertex3d(xPos, yNeg, zPos);
+		glVertex3d(xNeg, yNeg, zPos);
+		glVertex3d(xNeg, yPos, zPos);
+		glEnd();
+		//side/side
+		glBegin(GL_POLYGON);
+		glVertex3d(xPos, yPos, zNeg);
+		glVertex3d(xPos, yPos, zPos);
+		glVertex3d(xPos, yNeg, zPos);
+		glVertex3d(xPos, yNeg, zNeg);
+		glEnd();
+		glBegin(GL_POLYGON);
+		glVertex3d(xNeg, yPos, zNeg);
+		glVertex3d(xNeg, yPos, zPos);
+		glVertex3d(xNeg, yNeg, zPos);
+		glVertex3d(xNeg, yNeg, zNeg);
+		glEnd();
+		//top
+		glColor3f(0, 0, 0.5f);
+		glBegin(GL_POLYGON);
+		glVertex3d(xPos, yPos, zPos);
+		glVertex3d(xPos, yPos, zNeg);
+		glVertex3d(xNeg, yPos, zNeg);
+		glVertex3d(xNeg, yPos, zPos);
+		glEnd();
+		//bottom
+		glBegin(GL_POLYGON);
+		glVertex3d(xPos, yNeg, zPos);
+		glVertex3d(xPos, yNeg, zNeg);
+		glVertex3d(xNeg, yNeg, zNeg);
+		glVertex3d(xNeg, yNeg, zPos);
+		glEnd();
+	}
+	
     private Point3D getPosition(Player player) {
 		if(distanceXZ(player.position, cameraPos) >30){
 			Point3D endPoint = new Point3D(0,0,0);
