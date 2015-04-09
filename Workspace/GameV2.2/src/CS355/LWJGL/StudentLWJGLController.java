@@ -42,7 +42,6 @@ public class StudentLWJGLController implements CS355LWJGLController {
 	float ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 	float diffuseLight[] = { 0.1f, 0.8f, 0.1f, 1.0f };
 	float specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-	float position[] = { -295f,10f,50f, 1.0f };
 
 	private static FloatBuffer asFloatBuffer(float[] values) {
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(values.length);
@@ -62,7 +61,7 @@ public class StudentLWJGLController implements CS355LWJGLController {
 		// Somewhere in the initialization part of your program…
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
-		//GL11.glLightModeli(GL11.GL_LIGHT_MODEL_TWO_SIDE, GL11.GL_TRUE);
+		GL11.glLightModeli(GL11.GL_LIGHT_MODEL_TWO_SIDE, GL11.GL_TRUE);
 
 
 		GL11.glColorMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE);
@@ -170,20 +169,24 @@ public class StudentLWJGLController implements CS355LWJGLController {
         //This clears the screen.
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
-        glRotatef(cameraRot, 0, 1, 0);
+		glShadeModel(GL_SMOOTH);
+		glRotatef(cameraRot, 0, 1, 0);
         //glRotatef((float)90, 1, 0, 0); //used to look down
-        glTranslatef(-(float) cameraPos.x, -(float) cameraPos.y, -(float) cameraPos.z);
+		glTranslatef(-(float) cameraPos.x, -(float) cameraPos.y, -(float) cameraPos.z);
 
 		//*************************lighting stuff****************************/
 		//glLight(GL_LIGHT0, GL_AMBIENT, asFloatBuffer(ambientLight));
 		//glLight(GL_LIGHT0, GL_DIFFUSE, asFloatBuffer(diffuseLight));
 		//glLight(GL_LIGHT0, GL_SPECULAR, asFloatBuffer(specularLight));
+		float position[] = { (float)cameraPos.x,(float)cameraPos.y,(float)cameraPos.z, 1.0f };
+
 		glLight(GL_LIGHT0, GL_POSITION, asFloatBuffer(position));
 		glColor3d(1, 1, 1);
 		drawSquare(new Point3D(-295, 10, 50));
 
 		for(int a = 0; a < maze.Walls.size();a++){
 	        glBegin(GL_POLYGON);
+			//glNormal3d(maze.Walls.get(a).faceNormal.x, maze.Walls.get(a).faceNormal.y, maze.Walls.get(a).faceNormal.z);
 	        glColor3d(maze.Walls.get(a).color.r, maze.Walls.get(a).color.g, maze.Walls.get(a).color.b);
 	        for(int b = 0; b < maze.Walls.get(a).corners.size();b++){
 	        	glVertex3d(maze.Walls.get(a).corners.get(b).x, maze.Walls.get(a).corners.get(b).y, maze.Walls.get(a).corners.get(b).z);
@@ -280,7 +283,7 @@ public class StudentLWJGLController implements CS355LWJGLController {
 		glVertex3d(xNeg, yNeg, zPos);
 		glEnd();
 	}
-	
+
     private Point3D getPosition(Player player) {
 		if(distanceXZ(player.position, cameraPos) >30){
 			Point3D endPoint = new Point3D(0,0,0);

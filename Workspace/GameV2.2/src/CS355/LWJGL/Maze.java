@@ -1,6 +1,11 @@
 package CS355.LWJGL;
 
+import org.lwjgl.Sys;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Maze {
 	public ArrayList<Wall> Walls = new ArrayList<Wall>();
@@ -94,5 +99,22 @@ public class Maze {
 		
 		Walls.add(new Wall(new Point3D(-220,0,260),new Point3D(-100,0,260),new Point3D(-100,80,260),new Point3D(-220,80,260),new Color3D(0, .4,0)));
 		Walls.add(new Wall(new Point3D(-60,0,260),new Point3D(220,0,260),new Point3D(220,80,260),new Point3D(-60,80,260),new Color3D(0, .4,0)));
+		findWallsPerVertex();
+	}
+
+	private void findWallsPerVertex() {
+		HashMap<Point3D, ArrayList<Wall>> ugh = new HashMap<Point3D, ArrayList<Wall>>();
+		for(Wall w: Walls) {
+			for(Point3D p: w.corners) {
+				ArrayList<Wall> temp = ugh.get(p);
+				if(temp == null)
+					temp = new ArrayList<Wall>();
+
+				temp.add(w);
+				ugh.put(p, temp);
+			}
+		}
+		System.out.println("");
+
 	}
 }
