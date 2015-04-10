@@ -51,6 +51,7 @@ public class OBJReader {
                     q.addNormal(vNormals.get(nIndex));
                 }
                 quadrilaterals.add(q);
+                //check intersects
             }
         }
     }

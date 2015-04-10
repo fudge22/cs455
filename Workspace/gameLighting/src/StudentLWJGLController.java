@@ -28,7 +28,7 @@ import static org.lwjgl.util.glu.GLU.gluPerspective;
  */
 public class StudentLWJGLController implements CS355LWJGLController {
 	
-	private Point3D cameraPos = new Point3D(281,10,-18);
+	private Point3D cameraPos = new Point3D(-295,10,-18);
 	private float cameraRot = 0;
 	private Maze maze = new Maze();
     private Player player1 = new Player(new Color3D(.5, .4,.3), new Point3D(295,0,0));
@@ -43,6 +43,7 @@ public class StudentLWJGLController implements CS355LWJGLController {
     float ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
     float diffuseLight[] = { 0f, 0f, 1f, 1.0f };
     float specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    OBJReader objReader;
 
     private static FloatBuffer asFloatBuffer(float[] values) {
         FloatBuffer buffer = BufferUtils.createFloatBuffer(values.length);
@@ -52,6 +53,8 @@ public class StudentLWJGLController implements CS355LWJGLController {
     }
 	@Override
 	public void resizeGL()  {
+
+        objReader = new OBJReader(new File("realMaze4.obj"));
         glViewport(0, 0, LWJGLSandbox.DISPLAY_WIDTH, LWJGLSandbox.DISPLAY_HEIGHT);
 
         glMatrixMode(GL_PROJECTION);
@@ -74,9 +77,9 @@ public class StudentLWJGLController implements CS355LWJGLController {
         GL11.glColorMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE);
         GL11.glEnable(GL11.GL_COLOR_MATERIAL);//allows you to add lighting to already color polygons
 
-       float position0[] = { 0,0,0, 1.0f };
+       float position0[] = { 0, 0,0, 1.0f };
        glLight(GL_LIGHT0, GL_POSITION, asFloatBuffer(position0));
-       glLightf (GL_LIGHT0, GL_SPOT_CUTOFF, 10.f);
+       glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20);
     }
 
     @Override
@@ -84,7 +87,7 @@ public class StudentLWJGLController implements CS355LWJGLController {
     {
 
         if(spellCast)
-            spellX+=0.1;
+            spellX+=1;
         else{
             spellX = (float)cameraPos.x;
             spellY = (float)cameraPos.y;
@@ -115,12 +118,12 @@ public class StudentLWJGLController implements CS355LWJGLController {
         if(Keyboard.isKeyDown(Keyboard.KEY_Q)) 
         {
             //turn left
-            cameraRot = cameraRot - 1;
+            cameraRot = cameraRot - 2;
         }
         else if(Keyboard.isKeyDown(Keyboard.KEY_E)) 
         {
             //turn right
-            cameraRot = cameraRot + 1;
+            cameraRot = cameraRot + 2;
         }
         else if(Keyboard.isKeyDown(Keyboard.KEY_LEFT)) 
         {
@@ -158,7 +161,7 @@ public class StudentLWJGLController implements CS355LWJGLController {
 
 
         glRotatef(cameraRot, 0, 1, 0);
-        //glRotatef((float)90, 1, 0, 0); used to look down
+        //glRotatef((float)90, 1, 0, 0); //used to look down
         glTranslatef(-(float) cameraPos.x, -(float) cameraPos.y, -(float) cameraPos.z);
 
         //glLight(GL_LIGHT0, GL_AMBIENT, asFloatBuffer(ambientLight));
@@ -168,7 +171,7 @@ public class StudentLWJGLController implements CS355LWJGLController {
         if(spellCast) {
             glEnable(GL_LIGHT1);
             //
-            // glDisable(GL_LIGHT0);
+             glDisable(GL_LIGHT0);
             glColor3d(0, 0, 1);
             drawSquare(new Point3D(spellX, spellY, spellZ));
         }
@@ -184,17 +187,15 @@ public class StudentLWJGLController implements CS355LWJGLController {
         glLight(GL_LIGHT1, GL_SPECULAR, asFloatBuffer(specularLight));
         glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, .005f);
 
-        OBJReader objReader = new OBJReader(new File("2dmaze3.obj"));
         ArrayList<Quad> quads = objReader.getQuadrilaterals();
         for(int i = 0; i < quads.size(); i++) {
             Quad quad = quads.get(i);
             glPolygonMode(GL_FRONT, GL_FILL);
             glBegin(GL_POLYGON);
-            if(quad.getV1().y == 0 && quad.getV3().y == 0 && quad.getV2().y == 0)
+            if(quad.getN1().y == 1 &&  quad.getV1().y < 0.1)
                 glColor3d(.8, .2, .2);
             else
                 glColor3d(.2, .8, .2);
-            Point3D fn = quad.getFaceNormal();
             glNormal3d(quad.getN1().x, quad.getN1().y, quad.getN1().z);
             glVertex3d(quad.getV1().x, quad.getV1().y, quad.getV1().z);
 
