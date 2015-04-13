@@ -27,6 +27,7 @@ public class StudentLWJGLController implements CS355LWJGLController {
     private float spellZ = (float)cameraPos.z;
     private boolean spellCast = false;
     private double spellcastRot = 0;
+    private int spellcastCount = 0;
     private boolean lumos = false;
 	
 	private boolean paused = false;
@@ -82,14 +83,19 @@ public class StudentLWJGLController implements CS355LWJGLController {
     	
     	if(!paused){
     		if(spellCast){
-                spellX+=Math.sin(Math.toRadians(spellcastRot));
-    			spellZ-=Math.cos(Math.toRadians(spellcastRot));
+                spellX+=2*Math.sin(Math.toRadians(spellcastRot));
+    			spellZ-=2*Math.cos(Math.toRadians(spellcastRot));
+    			spellcastCount++;
+    			if(spellcastCount>70){
+    				spellCast = false;
+    			}
     		}
             else{
                 spellX = (float)cameraPos.x;
                 spellY = (float)cameraPos.y;
                 spellZ = (float)cameraPos.z;
                 spellcastRot = cameraRot;
+                spellcastCount = 0;
             }
     		
 	    	//use an ik solver to update the angle of each player
@@ -215,8 +221,13 @@ public class StudentLWJGLController implements CS355LWJGLController {
         else if(Keyboard.isKeyDown(Keyboard.KEY_SPACE))
         {
         	if(!sChecker){
-        		spellCast = !spellCast;
+        		spellCast = true;
         		lumos = false;
+        		spellX = (float)cameraPos.x;
+                spellY = (float)cameraPos.y;
+                spellZ = (float)cameraPos.z;
+                spellcastRot = cameraRot;
+                spellcastCount = 0;
         	}
         	sChecker = true;
         }
