@@ -12,7 +12,9 @@ public class Quad {
     private  Point3D n2;
     private  Point3D n3;
     private  Point3D n4;
-    private Point3D faceNormal;
+    private Point3D t1;
+    private Point3D t2;
+    private Point3D t3;
 
     public Quad() {
     }
@@ -44,16 +46,19 @@ public class Quad {
         }
         else if(n4 == null) {
             n4 = n;
-            calculateFaceNormal();
         }
     }
 
-    private void calculateFaceNormal() {
-        double x = n1.x + n2.x + n3.x;
-        double y = n1.y + n2.y + n3.y;
-        double z = n1.z + n2.z + n3.z;
-
-        faceNormal = new Point3D(x/3.0, y/3.0, z/3.0);
+    public void addTexture(Point3D t) {
+        if(t1 == null) {
+            t1 = t;
+        }
+        else if(t2 == null) {
+            t2 = t;
+        }
+        else if(t3 == null) {
+            t3 = t;
+        }
     }
 
     public Point3D getV1() {
@@ -72,11 +77,6 @@ public class Quad {
         return v4;
     }
 
-    public Point3D getFaceNormal() {
-        calculateFaceNormal();
-        return faceNormal;
-    }
-
     public Point3D getN1() {
         return n1;
     }
@@ -89,25 +89,16 @@ public class Quad {
         return n3;
     }
 
-    public Point3D getMiddlePosition() {
-        double x = v1.x + v2.x + v3.x;
-        double y = v1.y + v2.y + v3.y;
-        double z = v1.z + v2.z + v3.z;
+    public Point3D getT1() {
+        return t1;
+    }
 
-        if(v4 != null) {
-            x += v4.x;
-            y += v4.y;
-            z += v4.z;
-            return new Point3D(x/4.0, y/4.0, z/4.0);
-        }
-        return new Point3D(x/3.0, y/3.0, z/3.0);
+    public Point3D getT2() {
+        return t2;
+    }
+
+    public Point3D getT3() {
+        return t3;
     }
 
 }
-
-//glEnable(GL_CONSTANT_ATTENUATION);
-//glEnable(GL_LINEAR_ATTENUATION);
-//glEnable(GL_QUADRATIC_ATTENUATION);
-//glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 2f);
-//glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1f);
-//glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, .5f);

@@ -22,11 +22,11 @@ import org.newdawn.slick.util.ResourceLoader;
  */
 public class StudentLWJGLController implements CS355LWJGLController {
 	
-	private Point3D cameraPos = new Point3D(-276,14,20);
+	private Point3D cameraPos = new Point3D(-276,10,20);
 	private float cameraRot = 0;
-	private Player player1 = new Player(new Color3D(.5, .4,.3), new Point3D(295,5,0));
-	private Player player2 = new Player(new Color3D(.7, .4,.3), new Point3D(0,5,-295));
-	private Player player3 = new Player(new Color3D(.6, .4,.2), new Point3D(0,5,295));
+	private Player player1 = new Player(new Color3D(.5, .4,.3), new Point3D(295,3,0));
+	private Player player2 = new Player(new Color3D(.7, .4,.3), new Point3D(0,3,-295));
+	private Player player3 = new Player(new Color3D(.6, .4,.2), new Point3D(0,3,295));
 	private Player user = new Player(new Color3D(.6, .4,.2), new Point3D(0,0,295));
 
 	private float spellX = (float)cameraPos.x;
@@ -625,16 +625,16 @@ public class StudentLWJGLController implements CS355LWJGLController {
 	   			currentDegrees = currentDegrees -360;
 	   		}
 	   		if(currentDegrees >= 0 && currentDegrees <= 90){
-	   			endPoint = new Point3D(player.position.x+.3 * Math.cos(Math.toRadians(currentDegrees)),5,player.position.z+.3 * Math.cos(Math.toRadians(90-(currentDegrees))));
+	   			endPoint = new Point3D(player.position.x+.3 * Math.cos(Math.toRadians(currentDegrees)),3,player.position.z+.3 * Math.cos(Math.toRadians(90-(currentDegrees))));
 	   		}
 	   		else if(currentDegrees > 90 && currentDegrees <= 180){
-	   			endPoint = new Point3D(player.position.x-.3 * Math.cos(Math.toRadians(180-currentDegrees)),5,player.position.z+.3 * Math.cos(Math.toRadians(90-(180-currentDegrees))));
+	   			endPoint = new Point3D(player.position.x-.3 * Math.cos(Math.toRadians(180-currentDegrees)),3,player.position.z+.3 * Math.cos(Math.toRadians(90-(180-currentDegrees))));
 	   		}
 	   		else if(currentDegrees > 180 && currentDegrees <= 270){
-	   			endPoint = new Point3D(player.position.x-.3 * Math.cos(Math.toRadians(currentDegrees-180)),5,player.position.z-.3 * Math.cos(Math.toRadians(90-(currentDegrees-180))));
+	   			endPoint = new Point3D(player.position.x-.3 * Math.cos(Math.toRadians(currentDegrees-180)),3,player.position.z-.3 * Math.cos(Math.toRadians(90-(currentDegrees-180))));
 	   		}
 	   		else if(currentDegrees > 270 && currentDegrees <= 360){
-	   			endPoint = new Point3D(player.position.x+.3 * Math.cos(Math.toRadians(360-currentDegrees)),5,player.position.z-.3 * Math.cos(Math.toRadians(90-(360-currentDegrees))));
+	   			endPoint = new Point3D(player.position.x+.3 * Math.cos(Math.toRadians(360-currentDegrees)),3,player.position.z-.3 * Math.cos(Math.toRadians(90-(360-currentDegrees))));
 	   		}
 	   		return endPoint;
    		}

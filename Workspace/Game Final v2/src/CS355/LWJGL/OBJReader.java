@@ -26,8 +26,10 @@ public class OBJReader {
     public void parse() throws IOException {
         ArrayList<Point3D> vertices = new ArrayList<>();
         ArrayList<Point3D> vNormals = new ArrayList<>();
+        ArrayList<Point3D> vTextures = new ArrayList<>();
         quadrilaterals = new ArrayList<>();
         quadsToCheck = new ArrayList<>();
+        boolean haveTexture = false;
 
         String line = "";
         while ((line = reader.readLine()) != null) {
@@ -44,15 +46,33 @@ public class OBJReader {
                 vNormals.add(n);
             }
 
+            if(line.startsWith("vt")) {
+                String[] vLine = line.split(" ");
+                Point3D t = new Point3D(Double.parseDouble(vLine[1]), Double.parseDouble(vLine[2]), 0);
+                vTextures.add(t);
+                haveTexture = true;
+            }
+
             if(line.startsWith("f")) {
                 String[] fLine = line.split(" ");
                 Quad q = new Quad();
                 for(int i = 1; i < fLine.length; i++) {
-                    String[] indexes = fLine[i].split("//");
-                    int vIndex = Integer.parseInt(indexes[0])-1;
-                    int nIndex = Integer.parseInt(indexes[1])-1;
-                    q.addVertex(vertices.get(vIndex));
-                    q.addNormal(vNormals.get(nIndex));
+                    if(haveTexture) {
+                        String[] indexes = fLine[i].split("/");
+                        int vIndex = Integer.parseInt(indexes[0])-1;
+                        int tIndex = Integer.parseInt(indexes[1])-1;
+                        int nIndex = Integer.parseInt(indexes[2])-1;
+                        q.addVertex(vertices.get(vIndex));
+                        q.addNormal(vNormals.get(nIndex));
+                        q.addTexture(vTextures.get(tIndex));
+                    }
+                    else {
+                        String[] indexes = fLine[i].split("//");
+                        int vIndex = Integer.parseInt(indexes[0]) - 1;
+                        int nIndex = Integer.parseInt(indexes[1]) - 1;
+                        q.addVertex(vertices.get(vIndex));
+                        q.addNormal(vNormals.get(nIndex));
+                    }
                 }
                 quadrilaterals.add(q);
                 
