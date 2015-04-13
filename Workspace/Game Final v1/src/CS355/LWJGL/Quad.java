@@ -13,6 +13,9 @@ public class Quad {
     private  Point3D n3;
     private  Point3D n4;
     private Point3D faceNormal;
+    private Point3D t1;
+    private Point3D t2;
+    private Point3D t3;
 
     public Quad() {
     }
@@ -45,6 +48,18 @@ public class Quad {
         else if(n4 == null) {
             n4 = n;
             calculateFaceNormal();
+        }
+    }
+
+    public void addTexture(Point3D t) {
+        if(t1 == null) {
+            t1 = t;
+        }
+        else if(t2 == null) {
+            t2 = t;
+        }
+        else if(t3 == null) {
+            t3 = t;
         }
     }
 
@@ -87,6 +102,18 @@ public class Quad {
 
     public Point3D getN3() {
         return n3;
+    }
+
+    public Point3D getT1() {
+        return t1;
+    }
+
+    public Point3D getT2() {
+        return t2;
+    }
+
+    public Point3D getT3() {
+        return t3;
     }
 
     public Point3D getMiddlePosition() {

@@ -2,6 +2,7 @@ package CS355.LWJGL;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
@@ -10,18 +11,24 @@ import org.lwjgl.input.Keyboard;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
 
+
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.TextureLoader;
+import org.newdawn.slick.util.ResourceLoader;
+
 /**
  *
  * @author Brennan Smith
  */
 public class StudentLWJGLController implements CS355LWJGLController {
 	
-	private Point3D cameraPos = new Point3D(-295,10,20);
+	private Point3D cameraPos = new Point3D(-276,14,20);
 	private float cameraRot = 0;
-	private Player player1 = new Player(new Color3D(.5, .4,.3), new Point3D(295,0,0));
-	private Player player2 = new Player(new Color3D(.7, .4,.3), new Point3D(0,0,-295));
-	private Player player3 = new Player(new Color3D(.6, .4,.2), new Point3D(0,0,295));
-	
+	private Player player1 = new Player(new Color3D(.5, .4,.3), new Point3D(295,5,0));
+	private Player player2 = new Player(new Color3D(.7, .4,.3), new Point3D(0,5,-295));
+	private Player player3 = new Player(new Color3D(.6, .4,.2), new Point3D(0,5,295));
+	private Player user = new Player(new Color3D(.6, .4,.2), new Point3D(0,0,295));
+
 	private float spellX = (float)cameraPos.x;
     private float spellY = (float)cameraPos.y;
     private float spellZ = (float)cameraPos.z;
@@ -40,7 +47,13 @@ public class StudentLWJGLController implements CS355LWJGLController {
     float diffuseLight[] = { 0f, 0f, 1f, 1.0f };
     float specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
     OBJReader objReader;
-	
+	Texture textureMaze;
+	Texture textureP1;
+	Texture textureP2;
+	Texture textureP3;
+	Texture textureUser;
+	Texture textureSpell;
+
     private static FloatBuffer asFloatBuffer(float[] values) {
         FloatBuffer buffer = BufferUtils.createFloatBuffer(values.length);
         buffer.put(values);
@@ -56,20 +69,36 @@ public class StudentLWJGLController implements CS355LWJGLController {
 		gluPerspective(60, 500/500, 1, 1000);
 		glMatrixMode(GL_MODELVIEW);
 		
-		objReader = new OBJReader(new File("realMaze4.obj"));
+		objReader = new OBJReader(new File("textureMaze2.obj"));
 		
         //lighting
         glEnable(GL_DEPTH_TEST);
         glShadeModel(GL_SMOOTH);
         glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
         glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
         glEnable(GL_COLOR_MATERIAL);//allows you to add lighting to already color polygons
 
-       float position0[] = { 0, 0,0, 1.0f };
+       float position0[] = { 0, 0,-2.3f, 1.0f };
        glLight(GL_LIGHT0, GL_POSITION, asFloatBuffer(position0));
        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 20);
+
+		//texturing
+		glEnable(GL_TEXTURE_2D);
+
+		try {
+			textureMaze = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("maze.png"));
+			textureP1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("wizardColor.png"));
+			textureP2 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("wizardColor2.png"));
+			textureP3 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("wizardColor3.png"));
+			textureUser = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("userColor.png"));
+			textureSpell = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("spell.png"));
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -237,7 +266,6 @@ public class StudentLWJGLController implements CS355LWJGLController {
     	glLoadIdentity();
         //This clears the screen.
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
         glRotatef(cameraRot, 0, 1, 0);
         if(paused){
         	glRotatef((float)90, 1, 0, 0); //used to look down
@@ -247,7 +275,7 @@ public class StudentLWJGLController implements CS355LWJGLController {
         if(spellCast) {
             glEnable(GL_LIGHT1);
             glDisable(GL_LIGHT0);
-            glColor3d(0, 0, 1);
+            //glColor3d(0, 0, 1);
             drawSquare(new Point3D(spellX, spellY, spellZ));
         } 
         else if(lumos){
@@ -266,61 +294,111 @@ public class StudentLWJGLController implements CS355LWJGLController {
         glLight(GL_LIGHT1, GL_SPECULAR, asFloatBuffer(specularLight));
         glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, .005f);
 
+		textureMaze.bind();
+		//maze rendering
         ArrayList<Quad> quads = objReader.getQuadrilaterals();
         for(int i = 0; i < quads.size(); i++) {
             Quad quad = quads.get(i);
             glPolygonMode(GL_FRONT, GL_FILL);
             glBegin(GL_POLYGON);
-            if(quad.getN1().y == 1 &&  quad.getV1().y < 0.1)
-                glColor3d(.8, .2, .2);
-            else
-                glColor3d(.2, .8, .2);
-            glNormal3d(quad.getN1().x, quad.getN1().y, quad.getN1().z);
-            glVertex3d(quad.getV1().x, quad.getV1().y, quad.getV1().z);
 
-            glNormal3d(quad.getN2().x, quad.getN2().y, quad.getN2().z);
-            glVertex3d(quad.getV2().x, quad.getV2().y, quad.getV2().z);
+			glNormal3d(quad.getN1().x, quad.getN1().y, quad.getN1().z);
+			glTexCoord2d(quad.getT1().x, 1 - quad.getT1().y);
+			glVertex3d(quad.getV1().x, quad.getV1().y, quad.getV1().z);
 
-            glNormal3d(quad.getN3().x, quad.getN3().y, quad.getN3().z);
-            glVertex3d(quad.getV3().x, quad.getV3().y, quad.getV3().z);
-            glEnd();
+			glNormal3d(quad.getN2().x, quad.getN2().y, quad.getN2().z);
+			glTexCoord2d(quad.getT2().x, 1 - quad.getT2().y);
+			glVertex3d(quad.getV2().x, quad.getV2().y, quad.getV2().z);
+
+			glNormal3d(quad.getN3().x, quad.getN3().y, quad.getN3().z);
+			glTexCoord2d(quad.getT3().x, 1-quad.getT3().y);
+			glVertex3d(quad.getV3().x, quad.getV3().y, quad.getV3().z);
+			glEnd();
         }
 
-        //glPopMatrix();
-    	
+		glPushMatrix();
+		glTranslated(cameraPos.x, cameraPos.y-8, cameraPos.z);
+		glRotated(180-cameraRot, 0, 1, 0);
+		textureUser.bind();
+		for(int b = 0; b < user.polygons.size();b++){
+			Quad quad = user.polygons.get(b);
+			glBegin(GL_POLYGON);
+			glNormal3d(quad.getN1().x, quad.getN1().y, quad.getN1().z);
+			glTexCoord2d(quad.getT1().x, 1 - quad.getT1().y);
+			glVertex3d(quad.getV1().x, quad.getV1().y, quad.getV1().z);
+
+			glNormal3d(quad.getN2().x, quad.getN2().y, quad.getN2().z);
+			glTexCoord2d(quad.getT2().x, 1 - quad.getT2().y);
+			glVertex3d(quad.getV2().x, quad.getV2().y, quad.getV2().z);
+
+			glNormal3d(quad.getN3().x, quad.getN3().y, quad.getN3().z);
+			glTexCoord2d(quad.getT3().x, 1-quad.getT3().y);
+			glVertex3d(quad.getV3().x, quad.getV3().y, quad.getV3().z);
+			glEnd();
+		}
+		glPopMatrix();
+
     	glPushMatrix();
     	glTranslated(player1.position.x, player1.position.y, player1.position.z);
-    	glRotated(90-player1.angle, 0, 1, 0);
+    	glRotated(90 - player1.angle, 0, 1, 0);
+		textureP1.bind();
     	for(int b = 0; b < player1.polygons.size();b++){
+			Quad quad = player1.polygons.get(b);
     		glBegin(GL_POLYGON);
-	        glColor3d(player1.color.r, player1.color.g, player1.color.b);
-	        for(int c = 0; c <player1.polygons.get(b).points.size();c++){
-	        	glVertex3d(player1.polygons.get(b).points.get(c).x, player1.polygons.get(b).points.get(c).y, player1.polygons.get(b).points.get(c).z);
-	        }
+			glNormal3d(quad.getN1().x, quad.getN1().y, quad.getN1().z);
+			glTexCoord2d(quad.getT1().x, 1 - quad.getT1().y);
+			glVertex3d(quad.getV1().x, quad.getV1().y, quad.getV1().z);
+
+			glNormal3d(quad.getN2().x, quad.getN2().y, quad.getN2().z);
+			glTexCoord2d(quad.getT2().x, 1 - quad.getT2().y);
+			glVertex3d(quad.getV2().x, quad.getV2().y, quad.getV2().z);
+
+			glNormal3d(quad.getN3().x, quad.getN3().y, quad.getN3().z);
+			glTexCoord2d(quad.getT3().x, 1-quad.getT3().y);
+			glVertex3d(quad.getV3().x, quad.getV3().y, quad.getV3().z);
 	        glEnd();
     	}
+
     	glPopMatrix();
     	glPushMatrix();
     	glTranslated(player2.position.x, player2.position.y, player2.position.z);
-    	glRotated(90-player2.angle, 0, 1, 0);
+    	glRotated(90 - player2.angle, 0, 1, 0);
+		textureP2.bind();
     	for(int b = 0; b < player2.polygons.size();b++){
+			Quad quad = player1.polygons.get(b);
     		glBegin(GL_POLYGON);
-	        glColor3d(player2.color.r, player2.color.g, player2.color.b);
-	        for(int c = 0; c <player2.polygons.get(b).points.size();c++){
-	        	glVertex3d(player2.polygons.get(b).points.get(c).x, player2.polygons.get(b).points.get(c).y, player2.polygons.get(b).points.get(c).z);
-	        }
+			glNormal3d(quad.getN1().x, quad.getN1().y, quad.getN1().z);
+			glTexCoord2d(quad.getT1().x, 1 - quad.getT1().y);
+			glVertex3d(quad.getV1().x, quad.getV1().y, quad.getV1().z);
+
+			glNormal3d(quad.getN2().x, quad.getN2().y, quad.getN2().z);
+			glTexCoord2d(quad.getT2().x, 1 - quad.getT2().y);
+			glVertex3d(quad.getV2().x, quad.getV2().y, quad.getV2().z);
+
+			glNormal3d(quad.getN3().x, quad.getN3().y, quad.getN3().z);
+			glTexCoord2d(quad.getT3().x, 1-quad.getT3().y);
+			glVertex3d(quad.getV3().x, quad.getV3().y, quad.getV3().z);
 	        glEnd();
     	}
     	glPopMatrix();
     	glPushMatrix();
     	glTranslated(player3.position.x, player3.position.y, player3.position.z);
-    	glRotated(90-player3.angle, 0, 1, 0);
+    	glRotated(90 - player3.angle, 0, 1, 0);
+		textureP3.bind();
     	for(int b = 0; b < player3.polygons.size();b++){
+			Quad quad = player1.polygons.get(b);
     		glBegin(GL_POLYGON);
-	        glColor3d(player3.color.r, player3.color.g, player3.color.b);
-	        for(int c = 0; c <player3.polygons.get(b).points.size();c++){
-	        	glVertex3d(player3.polygons.get(b).points.get(c).x, player3.polygons.get(b).points.get(c).y, player3.polygons.get(b).points.get(c).z);
-	        }
+			glNormal3d(quad.getN1().x, quad.getN1().y, quad.getN1().z);
+			glTexCoord2d(quad.getT1().x, 1 - quad.getT1().y);
+			glVertex3d(quad.getV1().x, quad.getV1().y, quad.getV1().z);
+
+			glNormal3d(quad.getN2().x, quad.getN2().y, quad.getN2().z);
+			glTexCoord2d(quad.getT2().x, 1 - quad.getT2().y);
+			glVertex3d(quad.getV2().x, quad.getV2().y, quad.getV2().z);
+
+			glNormal3d(quad.getN3().x, quad.getN3().y, quad.getN3().z);
+			glTexCoord2d(quad.getT3().x, 1-quad.getT3().y);
+			glVertex3d(quad.getV3().x, quad.getV3().y, quad.getV3().z);
 	        glEnd();
     	}
     	glPopMatrix();
@@ -447,27 +525,6 @@ public class StudentLWJGLController implements CS355LWJGLController {
     	
     	return false;
     }
-			
-    public Color3D getColor(Point3D p, Color3D c) {
-        Point3D light = new Point3D(0,0,0);
-        Point3D lightVector = new Point3D(light.x-p.x, light.y-p.y, light.z-p.z);
-        double lightLength = Math.sqrt(Math.pow(lightVector.x, 2)+
-                Math.pow(lightVector.y, 2)+
-                Math.pow(lightVector.z, 2));
-        lightVector = new Point3D(lightVector.x/lightLength, lightVector.y/lightLength, lightVector.z/lightLength);//normalizing
-        double dot = (p.x*lightVector.x) +
-                (p.y*lightVector.y) +
-                (p.z*lightVector.z);
-        dot = Math.max(0, dot);
-        float r, g, b;
-        r = (float)(0.8*dot+0.2);
-        g = (float)(0.8*dot+0.2);
-        b = (float)(0.8*dot+0.2);
-        r *= c.r;
-        g *= c.g;
-        b *= c.b;
-        return new Color3D(r, g, b);
-    }
 
     private void drawSquare(Point3D p) {
         if(p == null)
@@ -479,48 +536,72 @@ public class StudentLWJGLController implements CS355LWJGLController {
         double zPos = p.z + 0.5;
         double zNeg = p.z - 0.5;
 
+		textureSpell.bind();
         //front/back
         glBegin(GL_POLYGON);
+		glTexCoord2d(0, 0);
         glVertex3d(xPos, yPos, zNeg);
+		glTexCoord2d(0, 1);
         glVertex3d(xPos, yNeg, zNeg);
+		glTexCoord2d(1, 1);
         glVertex3d(xNeg, yNeg, zNeg);
+		glTexCoord2d(1, 0);
         glVertex3d(xNeg, yPos, zNeg);
         glEnd();
         glBegin(GL_POLYGON);
+		glTexCoord2d(0, 0);
         glVertex3d(xPos, yPos, zPos);
+		glTexCoord2d(0, 1);
         glVertex3d(xPos, yNeg, zPos);
+		glTexCoord2d(1, 1);
         glVertex3d(xNeg, yNeg, zPos);
+		glTexCoord2d(1, 0);
         glVertex3d(xNeg, yPos, zPos);
         glEnd();
         
         //side/side
         glBegin(GL_POLYGON);
+		glTexCoord2d(0, 0);
         glVertex3d(xPos, yPos, zNeg);
+		glTexCoord2d(0, 1);
         glVertex3d(xPos, yPos, zPos);
+		glTexCoord2d(1, 1);
         glVertex3d(xPos, yNeg, zPos);
+		glTexCoord2d(1, 0);
         glVertex3d(xPos, yNeg, zNeg);
         glEnd();
         glBegin(GL_POLYGON);
+		glTexCoord2d(0, 0);
         glVertex3d(xNeg, yPos, zNeg);
+		glTexCoord2d(0, 1);
         glVertex3d(xNeg, yPos, zPos);
+		glTexCoord2d(1, 1);
         glVertex3d(xNeg, yNeg, zPos);
+		glTexCoord2d(1, 0);
         glVertex3d(xNeg, yNeg, zNeg);
         glEnd();
         
         //top
-        glColor3f(0, 0, 0.5f);
         glBegin(GL_POLYGON);
+		glTexCoord2d(0, 0);
         glVertex3d(xPos, yPos, zPos);
+		glTexCoord2d(0, 1);
         glVertex3d(xPos, yPos, zNeg);
+		glTexCoord2d(1, 1);
         glVertex3d(xNeg, yPos, zNeg);
+		glTexCoord2d(1, 0);
         glVertex3d(xNeg, yPos, zPos);
         glEnd();
         
         //bottom
         glBegin(GL_POLYGON);
+		glTexCoord2d(0, 0);
         glVertex3d(xPos, yNeg, zPos);
+		glTexCoord2d(0, 1);
         glVertex3d(xPos, yNeg, zNeg);
+		glTexCoord2d(1, 1);
         glVertex3d(xNeg, yNeg, zNeg);
+		glTexCoord2d(1, 0);
         glVertex3d(xNeg, yNeg, zPos);
         glEnd();
     }
@@ -544,16 +625,16 @@ public class StudentLWJGLController implements CS355LWJGLController {
 	   			currentDegrees = currentDegrees -360;
 	   		}
 	   		if(currentDegrees >= 0 && currentDegrees <= 90){
-	   			endPoint = new Point3D(player.position.x+.3 * Math.cos(Math.toRadians(currentDegrees)),0,player.position.z+.3 * Math.cos(Math.toRadians(90-(currentDegrees))));
+	   			endPoint = new Point3D(player.position.x+.3 * Math.cos(Math.toRadians(currentDegrees)),5,player.position.z+.3 * Math.cos(Math.toRadians(90-(currentDegrees))));
 	   		}
 	   		else if(currentDegrees > 90 && currentDegrees <= 180){
-	   			endPoint = new Point3D(player.position.x-.3 * Math.cos(Math.toRadians(180-currentDegrees)),0,player.position.z+.3 * Math.cos(Math.toRadians(90-(180-currentDegrees))));
+	   			endPoint = new Point3D(player.position.x-.3 * Math.cos(Math.toRadians(180-currentDegrees)),5,player.position.z+.3 * Math.cos(Math.toRadians(90-(180-currentDegrees))));
 	   		}
 	   		else if(currentDegrees > 180 && currentDegrees <= 270){
-	   			endPoint = new Point3D(player.position.x-.3 * Math.cos(Math.toRadians(currentDegrees-180)),0,player.position.z-.3 * Math.cos(Math.toRadians(90-(currentDegrees-180))));
+	   			endPoint = new Point3D(player.position.x-.3 * Math.cos(Math.toRadians(currentDegrees-180)),5,player.position.z-.3 * Math.cos(Math.toRadians(90-(currentDegrees-180))));
 	   		}
 	   		else if(currentDegrees > 270 && currentDegrees <= 360){
-	   			endPoint = new Point3D(player.position.x+.3 * Math.cos(Math.toRadians(360-currentDegrees)),0,player.position.z-.3 * Math.cos(Math.toRadians(90-(360-currentDegrees))));
+	   			endPoint = new Point3D(player.position.x+.3 * Math.cos(Math.toRadians(360-currentDegrees)),5,player.position.z-.3 * Math.cos(Math.toRadians(90-(360-currentDegrees))));
 	   		}
 	   		return endPoint;
    		}

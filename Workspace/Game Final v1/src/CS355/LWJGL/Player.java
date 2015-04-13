@@ -1,9 +1,10 @@
 package CS355.LWJGL;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class Player {
-	public ArrayList<Polygon> polygons = new ArrayList<Polygon>();
+	public ArrayList<Quad> polygons = new ArrayList<Quad>();
 	public Color3D color;
 	public Point3D position;
 	public double angle;
@@ -13,6 +14,9 @@ public class Player {
 	public boolean isSpellCast;
 	
 	public Player(Color3D _color, Point3D start_position){
+		OBJReader objReader = new OBJReader(new File("wizard.obj"));
+		polygons = objReader.getQuadrilaterals();
+		/*
 		//front
 		polygons.add(new Polygon(new Point3D(-1,0,0),new Point3D(0,0,0),new Point3D(0,4,0),new Point3D(-1,4,0)));
 		polygons.add(new Polygon(new Point3D(1,0,0),new Point3D(2,0,0),new Point3D(2,4,0),new Point3D(1,4,0)));
@@ -52,6 +56,8 @@ public class Player {
 		polygons.add(new Polygon(new Point3D(1,10,-.33),new Point3D(1,10,-.66),new Point3D(1,11,-.66),new Point3D(1,11,-.33)));
 		polygons.add(new Polygon(new Point3D(0,10,-.33),new Point3D(1,10,-.33),new Point3D(1,11,-.33),new Point3D(1,11,-.33)));
 		polygons.add(new Polygon(new Point3D(0,10,-.66),new Point3D(1,10,-.66),new Point3D(1,11,-.66),new Point3D(0,11,-.66)));
+		*/
+
 		color = _color;
 		position = start_position;
 		angle = 0;
