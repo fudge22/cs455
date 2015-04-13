@@ -4,6 +4,7 @@ package CS355.LWJGL;
 import java.io.File;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
@@ -82,6 +83,26 @@ public class StudentLWJGLController implements CS355LWJGLController {
     {
     	
     	if(!paused){
+    		Random random = new Random();
+    		int num = random.nextInt(1000);
+    		if(player1.isHit){
+    			if(num == 121){
+    				player1.isHit = false;
+    				player1.color = new Color3D(.5, .4,.3);
+    			}
+    		}
+    		if(player2.isHit){
+    			if(num == 662){
+    				player2.isHit = false;
+    				player2.color = new Color3D(.7, .4,.3);
+    			}
+    		}
+    		if(player3.isHit){
+    			if(num == 207){
+    				player3.isHit = false;
+    				player3.color = new Color3D(.6, .4,.2);
+    			}
+    		}
     		if(spellCast){
                 spellX+=2*Math.sin(Math.toRadians(spellcastRot));
     			spellZ-=2*Math.cos(Math.toRadians(spellcastRot));
@@ -103,12 +124,12 @@ public class StudentLWJGLController implements CS355LWJGLController {
     			player1.isHit = true;
     			spellCast = false;
     		}
-    		if(Math.abs(spellX -player2.position.x) <3 && Math.abs(spellZ -player2.position.z) <3){
+    		else if(Math.abs(spellX -player2.position.x) <3 && Math.abs(spellZ -player2.position.z) <3){
     			player2.color = new Color3D(.1, .1, .1);
     			player2.isHit = true;
     			spellCast = false;
     		}
-    		if(Math.abs(spellX -player3.position.x) <3 && Math.abs(spellZ -player3.position.z) <3){
+    		else if(Math.abs(spellX -player3.position.x) <3 && Math.abs(spellZ -player3.position.z) <3){
     			player3.color = new Color3D(.1, .1, .1);
     			player3.isHit = true;
     			spellCast = false;
@@ -490,16 +511,16 @@ public class StudentLWJGLController implements CS355LWJGLController {
     		boolean fallsBetweenZ1 = false;
     		boolean fallsBetweenX2 = false;
     		boolean fallsBetweenZ2 = false;
-    		if(p1.x <= x+2 && p2.x >= x-2){
+    		if(p1.x <= x+.1 && p2.x >= x-1){
     			fallsBetweenX1 = true;
     		}
-    		if(p3.x <= x+2 && p4.x >= x-2){
+    		if(p3.x <= x+1 && p4.x >= x-1){
     			fallsBetweenX2 = true;
     		}
-    		if(p1.z <= z+2 && p2.z >= z-2){
+    		if(p1.z <= z+1 && p2.z >= z-1){
     			fallsBetweenZ1 = true;
     		}
-    		if(p3.z <= z+2 && p4.z >= z-2){
+    		if(p3.z <= z+1 && p4.z >= z-1){
     			fallsBetweenZ2 = true;
     		}
     		if(vertical1 && vertical2){
